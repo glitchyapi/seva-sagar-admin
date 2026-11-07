@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seva Sagar — Release Console</title>
+<style>
+:root{--bg:#F6F4F0;--card:#fff;--ink:#1D1A16;--mut:#7A7166;--line:#E8E1D6;--saf:#E8590C;--safd:#C64A08;--ok:#2F9E44;--bad:#E03131;--r:18px}
+*{box-sizing:border-box;margin:0}
+body{font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:80px}
+.wrap{max-width:1060px;margin:0 auto;padding:26px 20px}
+header{display:flex;align-items:center;gap:14px;padding:8px 0 22px}
+header .lg{width:46px;height:46px;border-radius:14px;background:#FFF1E8;display:grid;place-items:center}
+header h1{font-size:20px;letter-spacing:-.02em}
+header small{color:var(--mut);font-weight:600;display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card h2{font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h2 .pill{font-size:10px;background:#FFF1E8;color:var(--safd);padding:3px 8px;border-radius:99px;font-weight:800;letter-spacing:.06em}
+label{display:block;font-size:12px;font-weight:800;color:var(--mut);margin:12px 0 6px}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#FBFAF8;outline:none}
+input:focus,textarea:focus{border-color:var(--saf)}
+textarea{min-height:70px;resize:vertical}
+button{font:inherit;font-weight:800;border:0;border-radius:99px;padding:11px 18px;cursor:pointer}
+.b1{background:var(--saf);color:#fff}.b1:disabled{opacity:.45;cursor:wait}
+.b2{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.b3{background:#FDEEEE;color:var(--bad)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:120px}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-weight:600}
+.kv:last-child{border:0}
+.kv b{font-weight:800}
+.mut{color:var(--mut)}
+.ok{color:var(--ok);font-weight:800}.bad{color:var(--bad);font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+td,th{padding:7px 8px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+code{background:#F3EFE8;padding:2px 6px;border-radius:6px;font-size:11.5px;word-break:break-all}
+#log{background:#141210;color:#CFE8CF;border-radius:14px;padding:14px;font:11.5px/1.6 ui-monospace,Menlo,monospace;height:210px;overflow:auto;white-space:pre-wrap}
+.tag{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:99px}
+.tag.new{background:#EBFBEE;color:var(--ok)}.tag.chg{background:#FFF4E0;color:#B08900}.tag.same{background:#F1F3F5;color:#868E96}.tag.del{background:#FDEEEE;color:var(--bad)}
+.warn{background:#FFF4E0;border:1px solid #FFD8A8;border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:600;color:#8a5b00;margin-top:12px}
+.hide{display:none}
+.chk{display:flex;gap:8px;align-items:center;font-weight:700;font-size:13px;margin-top:10px}
+.chk input{width:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="lg"><svg width="30" height="30" viewBox="0 0 108 108"><path d="M54 28c7 9 12 15 12 23 0 8-5.4 13-12 13s-12-5-12-13c0-8 5-14 12-23z" fill="#E8590C"/><path d="M54 40c3.6 4.6 6 7.6 6 11.4 0 4.2-2.7 7-6 7s-6-2.8-6-7c0-3.8 2.4-6.8 6-11.4z" fill="#F59F00"/><path d="M38 67h32s-4 8-16 8-16-8-16-8z" fill="#C64A08"/><path d="M30 80c6-3.5 12-3.5 18 0s12 3.5 18 0c4-2.3 8-2.6 12-.6v3.6c-4-2-8-1.7-12 .6-6 3.4-18 3.4-24 0-4-2.3-8-2.6-12-.2z" fill="#1971C2" opacity=".9"/></svg></div>
+  <div><h1>Seva Sagar Release Console</h1><small>delta OTA publisher · GitHub-backed universal update channel</small></div>
+</header>
+
+<div class="grid">
+  <div class="card">
+    <h2>1 · Connect <span class="pill">GitHub</span></h2>
+    <label>Personal access token (repo scope)</label>
+    <input id="tok" type="password" placeholder="ghp_…" autocomplete="off">
+    <label>Update repo (owner/name)</label>
+    <input id="repo" value="glitchyapi/seva-sagar-update">
+    <div class="row" style="margin-top:14px">
+      <button class="b1" id="connect">Connect & load channel</button>
+    </div>
+    <div class="warn">The token is stored only in this browser's localStorage and sent only to api.github.com.</div>
+  </div>
+
+  <div class="card">
+    <h2>Channel status <span class="pill" id="stTag">offline</span></h2>
+    <div id="status"><p class="mut">Connect to load the live manifest.</p></div>
+    <label>Universal update URLs (built into the app)</label>
+    <div id="urls" class="mut" style="font-size:12px"></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>2 · Build a release <span class="pill">delta</span></h2>
+  <div class="row">
+    <div><label>Version code</label><input id="vc" type="number" value="2"></div>
+    <div><label>Version name</label><input id="vn" value="1.1.0"></div>
+    <div><label>Min shell version</label><input id="ms" type="number" value="1"></div>
+  </div>
+  <label class="chk"><input type="checkbox" id="force"> Force update (users cannot dismiss)</label>
+  <label>Release notes — English</label><textarea id="nEn" placeholder="• …"></textarea>
+  <div class="row">
+    <div><label>Notes — हिंदी</label><textarea id="nHi"></textarea></div>
+    <div><label>Notes — ਪੰਜਾਬੀ</label><textarea id="nPa"></textarea></div>
+  </div>
+  <label>Web bundle files (select the whole <code>webapp</code> folder, or individual files)</label>
+  <input id="files" type="file" multiple webkitdirectory>
+  <div class="row" style="margin-top:8px"><button class="b2" id="scan">Scan & diff against live channel</button></div>
+  <div id="difftable" style="margin-top:14px;overflow:auto"></div>
+  <div id="diffsum" class="mut" style="margin-top:8px;font-weight:700"></div>
+</div>
+
+<div class="grid" style="margin-top:16px">
+  <div class="card">
+    <h2>3 · Signing key <span class="pill">RSA-2048</span></h2>
+    <p class="mut" style="font-size:12.5px">Manifests are signed (SHA256withRSA). The app only accepts manifests whose <code>manifest.sig</code> verifies against the public key baked into the APK.</p>
+    <label>Private key PEM (PKCS#8)</label>
+    <textarea id="pem" placeholder="-----BEGIN PRIVATE KEY-----" style="min-height:110px;font-size:11px"></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="b2" id="savepem">Save key in browser</button>
+      <button class="b2" id="genkey">Generate new keypair</button>
+    </div>
+    <div id="pubout" class="mut" style="margin-top:10px;font-size:12px"></div>
+    <div class="warn">Generating a NEW keypair invalidates all previously installed shells — you must embed the new public key (below) into <code>UpdateKeys.kt</code> and ship a new APK.</div>
+  </div>
+  <div class="card">
+    <h2>4 · Publish</h2>
+    <p class="mut" style="font-size:12.5px">Uploads <code>manifest.json</code>, <code>manifest.sig</code> and every changed file to the update repo. Devices pick it up on next launch / background check and download <b>only the changed files</b>.</p>
+    <div class="row" style="margin-top:14px">
+      <button class="b1" id="publish" disabled>Sign & publish delta update</button>
+    </div>
+    <div id="pubsum" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>5 · Ship a new APK shell <span class="pill">optional</span></h2>
+  <p class="mut" style="font-size:12.5px">Only needed when native Kotlin code changes. Creates a GitHub Release on the update repo with the APK as a public asset; then set <i>min shell version</i> above to that versionCode so apps force-upgrade.</p>
+  <label>APK file</label>
+  <input id="apk" type="file" accept=".apk">
+  <div class="row" style="margin-top:10px">
+    <div><label>Tag</label><input id="apktag" value="apk-v1.0.1"></div>
+    <div><label>Release name</label><input id="apkname" value="Seva Sagar 1.0.1"></div>
+  </div>
+  <button class="b2" id="relapk" style="margin-top:12px">Create release + upload APK</button>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>Console log</h2>
+  <div id="log"></div>
+</div>
+</div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const LS={get:k=>localStorage.getItem('ss_'+k),set:(k,v)=>localStorage.setItem('ss_'+k,v)};
+let TOK='',REPO='',LIVE=null,SCANNED=null,PEMKEY=null;
+const log=(...a)=>{const l=$('#log');l.textContent+=a.join(' ')+'\n';l.scrollTop=l.scrollHeight;};
+const b64buf=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+async function sha256hex(buf){const d=await crypto.subtle.digest('SHA-256',buf);return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+function api(path,opt={}){opt.headers=Object.assign({'Authorization':'Bearer '+TOK,'Accept':'application/vnd.github+json','User-Agent':'seva-admin'},opt.headers||{});if(opt.body)opt.headers['Content-Type']='application/json';return fetch('https://api.github.com'+path,opt).then(async r=>{if(!r.ok)throw new Error(path+' → '+r.status+' '+ (await r.text()).slice(0,200));return r.status===204?null:r.json();});}
+async function putFile(path,content,sha){const body={message:'console: '+path,content};if(sha)body.sha=sha;return api(`/repos/${REPO}/contents/${path}`,{method:'PUT',body:JSON.stringify(body)});}
+async function getSha(path){try{const r=await api(`/repos/${REPO}/contents/${path}`);return r.sha;}catch(e){return null;}}
+
+function pemToPkcs8(pem){const b64=pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');return Uint8Array.from(atob(b64),c=>c.charCodeAt(0));}
+async function loadKey(){const pem=LS.get('pem')||$('#pem').value.trim();if(!pem)return null;try{const k=await crypto.subtle.importKey('pkcs8',pemToPkcs8(pem),{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},true,['sign']);PEMKEY=k;const spki=await crypto.subtle.exportKey('spki',k);$('#pubout').innerHTML='public key (SPKI base64) for UpdateKeys.kt:<br><code>'+b64buf(spki)+'</code>';return k;}catch(e){log('key import failed:',e.message);return null;}}
+
+$('#connect').onclick=async()=>{
+  TOK=$('#tok').value.trim()||LS.get('tok')||'';REPO=$('#repo').value.trim();
+  if(!TOK){log('no token');return;}
+  LS.set('tok',TOK);LS.set('repo',REPO);$('#tok').value=TOK;
+  log('connecting to',REPO);
+  try{
+    const owner=REPO.split('/')[0];
+    const pages=await api(`/repos/${REPO}/pages`).catch(()=>null);
+    const base=pages?pages.html_url.replace(/\/$/,''):`https://${owner}.github.io/${REPO.split('/')[1]}`;
+    const r=await fetch(base+'/manifest.json?t='+Date.now(),{cache:'no-store'});
+    if(r.ok){LIVE=await r.json();log('live manifest v'+LIVE.versionCode+' ('+LIVE.files.length+' files)');}
+    else{LIVE={versionCode:0,versionName:'0',files:[]};log('no live manifest yet (fresh channel)');}
+    $('#stTag').textContent='live v'+LIVE.versionCode;$('#stTag').style.background='#EBFBEE';$('#stTag').style.color='#2F9E44';
+    $('#status').innerHTML=
+      `<div class="kv"><span>version</span><b>v${LIVE.versionCode} · ${LIVE.versionName}</b></div>`+
+      `<div class="kv"><span>published</span><b>${LIVE.publishedAt||'—'}</b></div>`+
+      `<div class="kv"><span>files</span><b>${LIVE.files.length}</b></div>`+
+      `<div class="kv"><span>payload</span><b>${(LIVE.files.reduce((a,f)=>a+f.size,0)/1024).toFixed(1)} KB</b></div>`+
+      `<div class="kv"><span>force</span><b>${LIVE.force?'YES':'no'}</b></div>`;
+    $('#urls').innerHTML=['<code>'+base+'/manifest.json</code>','<code>https://raw.githubusercontent.com/'+REPO+'/main/manifest.json</code>','files base: <code>'+base+'/files/…</code>'].join('<br>');
+    $('#vc').value=(LIVE.versionCode||0)+1;
+    await loadKey();
+    $('#publish').disabled=false;
+  }catch(e){log('connect failed:',e.message);$('#stTag').textContent='error';}
+};
+
+$('#files').onchange=()=>log('selected',$('#files').files.length,'files');
+
+$('#scan').onclick=async()=>{
+  const fs=[...$('#files').files];
+  if(!fs.length){log('choose files first');return;}
+  SCANNED=[];
+  for(const f of fs){
+    let rel=f.webkitRelativePath||f.name;
+    const parts=rel.split('/');
+    if(parts.length>1&&parts[0].toLowerCase()==='webapp')parts.shift();
+    rel=parts.join('/');
+    const buf=await f.arrayBuffer();
+    SCANNED.push({path:rel,size:buf.byteLength,sha256:await sha256hex(buf),buf});
+  }
+  SCANNED.sort((a,b)=>a.path.localeCompare(b.path));
+  const live=new Map((LIVE?.files||[]).map(f=>[f.path,f]));
+  let changed=0,kept=0,added=0,html='<table><tr><th>file</th><th>size</th><th>state</th></tr>';
+  for(const f of SCANNED){
+    const l=live.get(f.path);
+    let st,cls;
+    if(!l){st='new';cls='new';added++;changed++;}
+    else if(l.sha256!==f.sha256){st='changed';cls='chg';changed++;}
+    else{st='same';cls='same';kept++;}
+    html+=`<tr><td><code>${f.path}</code></td><td>${(f.size/1024).toFixed(1)} KB</td><td><span class="tag ${cls}">${st}</span></td></tr>`;
+  }
+  for(const l of live.files||[])if(!SCANNED.find(f=>f.path===l.path))html+=`<tr><td><code>${l.path}</code></td><td>—</td><td><span class="tag del">removed</span></td></tr>`;
+  html+='</table>';
+  $('#difftable').innerHTML=html;
+  $('#diffsum').textContent=`${changed} file(s) to download · ${kept} unchanged (kept on device) · users download only the ${changed}.`;
+  log('scan done:',SCANNED.length,'files,',changed,'changed');
+};
+
+$('#savepem').onclick=async()=>{LS.set('pem',$('#pem').value.trim());await loadKey();log('key saved in browser');};
+$('#genkey').onclick=async()=>{
+  const kp=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+  const pkcs8=await crypto.subtle.exportKey('pkcs8',kp.privateKey);
+  const spki=await crypto.subtle.exportKey('spki',kp.publicKey);
+  const pem='-----BEGIN PRIVATE KEY-----\n'+(b64buf(pkcs8).match(/.{1,64}/g)||[]).join('\n')+'\n-----END PRIVATE KEY-----';
+  $('#pem').value=pem;LS.set('pem',pem);PEMKEY=kp.privateKey;
+  $('#pubout').innerHTML='NEW public key (SPKI base64) — paste into UpdateKeys.kt:<br><code>'+b64buf(spki)+'</code>';
+  log('new keypair generated');
+};
+
+$('#publish').onclick=async()=>{
+  if(!SCANNED){log('scan first');return;}
+  const key=PEMKEY||await loadKey();
+  if(!key){log('no signing key — paste PEM or generate');return;}
+  const btn=$('#publish');btn.disabled=true;btn.textContent='Publishing…';
+  try{
+    const pages=await api(`/repos/${REPO}/pages`).catch(()=>null);
+    const base=pages?pages.html_url.replace(/\/$/,''):`https://${REPO.split('/')[0]}.github.io/${REPO.split('/')[1]}`;
+    const notes={};if($('#nEn').value.trim())notes.en=$('#nEn').value.trim();if($('#nHi').value.trim())notes.hi=$('#nHi').value.trim();if($('#nPa').value.trim())notes.pa=$('#nPa').value.trim();
+    const manifest={schema:1,app:'seva-sagar',versionName:$('#vn').value.trim(),versionCode:+$('#vc').value,minShellVersion:+$('#ms').value||1,force:$('#force').checked,publishedAt:new Date().toISOString().replace(/\.\d+Z$/,'Z'),notes,base:base+'/files',mirrors:['https://raw.githubusercontent.com/'+REPO+'/main'],files:SCANNED.map(f=>({path:f.path,sha256:f.sha256,size:f.size}))};
+    const raw=new TextEncoder().encode(JSON.stringify(manifest,null,1));
+    const sig=await crypto.subtle.sign({name:'RSASSA-PKCS1-v1_5'},key,raw);
+    log('manifest built: v'+manifest.versionCode+', '+manifest.files.length+' files, signing…');
+    let n=0;
+    const liveMap=new Map((LIVE?.files||[]).map(x=>[x.path,x]));
+    for(const f of SCANNED){
+      const l=liveMap.get(f.path);
+      if(l&&l.sha256===f.sha256){log(' skip (unchanged) files/'+f.path);continue;}
+      const sha=await getSha('files/'+f.path);
+      await putFile('files/'+f.path,b64buf(f.buf),sha);n++;
+      log(' pushed files/'+f.path);
+    }
+    await putFile('manifest.json',b64buf(raw),await getSha('manifest.json'));
+    await putFile('manifest.sig',btoa(String.fromCharCode(...new Uint8Array(sig))),await getSha('manifest.sig'));
+    log('PUBLISHED v'+manifest.versionCode+' ('+n+' files) → '+base+'/manifest.json');
+    $('#pubsum').innerHTML='<span class="ok">✓ Published.</span> Devices check on next open & every 6 h; they download only the changed files.';
+    LIVE=manifest;$('#stTag').textContent='live v'+manifest.versionCode;
+  }catch(e){log('publish failed:',e.message);$('#pubsum').innerHTML='<span class="bad">✗ '+e.message+'</span>';}
+  btn.disabled=false;btn.textContent='Sign & publish delta update';
+};
+
+$('#relapk').onclick=async()=>{
+  const f=$('#apk').files[0];if(!f){log('choose apk');return;}
+  const buf=await f.arrayBuffer();
+  const rel=await api(`/repos/${REPO}/releases`,{method:'POST',body:JSON.stringify({tag_name:$('#apktag').value.trim(),name:$('#apkname').value.trim(),body:'APK shell release'})});
+  const up=rel.upload_url.replace('{?name,label}','?name='+encodeURIComponent(f.name));
+  const r=await fetch(up,{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/vnd.android.package-archive'},body:buf});
+  log(r.ok?'APK release uploaded: '+rel.html_url:'apk upload failed '+r.status);
+};
+
+// restore
+$('#tok').value=LS.get('tok')||'';$('#repo').value=LS.get('repo')||$('#repo').value;$('#pem').value=LS.get('pem')||'';
+log('Seva Sagar release console ready.');
+</script>
+</body>
+</html>
